@@ -7,7 +7,7 @@
 
 var fsm = {
     stateMessages: {
-        'greeting': 'Hello, this is the MIIS information agent',
+        'greeting': 'Hello, this is the MIIS information agent.',
 
         "basic-question": "How can I help you?",
 
@@ -38,7 +38,7 @@ var fsm = {
     initialState: 'greeting',
 
     transitions: {
-        "greeting":  [{to: "basic-question", auto: true, kw: []}], // Auto transition
+        "greeting":  [{to: "basic-question", auto: true}], // Auto transition
         "basic-question": [
             { to: "admission", kw: ["admission"] },
             { to: "subjects", kw: ['subjects'] },

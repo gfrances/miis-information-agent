@@ -13,8 +13,12 @@ jQuery(function($) {
 
     var machine = {
         transitionMap: {},
+
         stateMessages: {},
+
         currentState: null,
+
+        autoTransitions: {}, // List of auto-transitioned states, to prevent loops
 
         create: function(transitionMap, stateMessages) {
             this.stateMessages = stateMessages;
@@ -22,9 +26,7 @@ jQuery(function($) {
         },
 
         init: function(initialState) {
-            this.checkStateIsValid(initialState);
-            this.currentState = initialState;
-            this.sayCurrentMessage();
+            this.transitionTo(initialState);
         },
 
         checkStateIsValid: function(state) {
@@ -33,14 +35,31 @@ jQuery(function($) {
             }
         },
 
+        performAutoTransition: function() {
+            var transitionList = this.transitionMap[this.currentState];
+            if (transitionList.length == 1 && transitionList[0].auto && transitionList[0].to) {
+                if (typeof this.autoTransitions[this.currentState] != "undefined") {
+                    throw new Error("There is a cycle of auto transitions starting at " + this.currentState);
+                }
+                this.autoTransitions[this.currentState] = true;
+                this.transitionTo(transitionList[0].to);
+            } else {
+                this.autoTransitions = {}; // Empty the auto-transitioned list
+            }
+        },
+
         feed: function(text) {
             var nextState = this.getBestTransition(text) || 'no-match';
+
             this.transitionTo(nextState);
+        },
+
+        afterStateTransition: function() {
+            // TODO: refactor somewhere else outside the class using events
 
             /* Utter the system message */
             this.sayCurrentMessage();
 
-            // TODO: refactor somewhere else outside the class
             if (this.isFinished()) dialogWindow.say("<INTERACTION FINISHED>");
         },
 
@@ -48,6 +67,8 @@ jQuery(function($) {
         transitionTo: function(nextState) {
             this.checkStateIsValid(nextState);
             this.currentState = nextState;
+            this.afterStateTransition(); // Trigger appropriate events
+            this.performAutoTransition();
         },
 
         isFinished: function() {
@@ -68,13 +89,12 @@ jQuery(function($) {
             var bestScore = 0;
 
             for(var transition in transitionList) {
-                var kwList = transitionList[transition].kw;
+                var kwList = transitionList[transition].kw || [];
                 var score = this.computeScore(kwList, text);
                 if (score > bestScore) {
                     bestDestination = transitionList[transition].to;
                 }
             }
-
             return bestDestination;
         },
 
