@@ -7,7 +7,10 @@
 
 var fsm = {
     stateMessages: {
-        'greeting': 'Hello, this is the MIIS information agent. How can I help you?',
+        'greeting': 'Hello, this is the MIIS information agent',
+
+        "basic-question": "How can I help you?",
+
         'goodbye': "Thanks for you interest. Should you have further questions, please do not hesitate to contact \
         the master's coordination office by e-mail at miis@upf.edu or visit the master's website at \
         ww.upf.edu/iis, Have a nice day.",
@@ -35,7 +38,8 @@ var fsm = {
     initialState: 'greeting',
 
     transitions: {
-        "greeting": [
+        "greeting":  [{to: "basic-question", auto: true, kw: []}], // Auto transition
+        "basic-question": [
             { to: "admission", kw: ["admission"] },
             { to: "subjects", kw: ['subjects'] },
             { to: "fees", kw: ['fees'] },
