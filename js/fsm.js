@@ -16,6 +16,7 @@ var fsm = {
         ww.upf.edu/iis, Have a nice day.",
 
         "admission": "",
+
         "subjects" : "The core subjects treated in the master are: Autonomous Behaviour, Web intelligence, \
         Robotics, Machine Learning and Natural Language Interaction. Would you like me to give more \
         details about any of the subjects?",
@@ -50,15 +51,15 @@ var fsm = {
         ],
 
         "subjects": [
-            {to: "greeting", kw: ['No']}
+            {to: "basic-question", kw: ['No']}
         ],
 
         "fees": [
-            {to: "greeting", kw: ['No']}
+            {to: "basic-question", kw: ['No']}
         ],
 
         "language": [
-            {to: "greeting", kw: ['No']}
+            {to: "basic-question", kw: ['No']}
         ],
 
         "goodbye": [],
