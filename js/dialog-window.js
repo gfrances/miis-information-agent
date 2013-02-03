@@ -2,6 +2,14 @@
  * Guillem Francès <guillem.frances@gmail.com>
  */
 
+function htmlEscape(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
 
 
 jQuery(function($){
@@ -20,7 +28,7 @@ jQuery(function($){
     var say = function(text, who) {
         who = who || '';
 //        dialogHistory.push(text);
-        dialogCanvas.append('<p class="dialog-line ' + who + '">' + text + '</p>');
+        dialogCanvas.append('<p class="dialog-line ' + who + '">' + htmlEscape(text) + '</p>');
         scrollCanvas();
     };
 

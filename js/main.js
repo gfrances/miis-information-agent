@@ -26,7 +26,14 @@ jQuery(function($) {
         },
 
         init: function(initialState) {
+            this.checkStates();
             this.transitionTo(initialState);
+        },
+
+        checkStates: function() {
+            _.each(_.keys(this.stateMessages), function(state) {
+                this.checkStateIsValid(state);
+            }, this);
         },
 
         checkStateIsValid: function(state) {
@@ -49,9 +56,16 @@ jQuery(function($) {
         },
 
         feed: function(text) {
-            var nextState = this.getBestTransition(text) || 'no-match';
+            if (this.checkFinished()) return;
+            var nextState = this.getBestTransition(text);
 
-            this.transitionTo(nextState);
+            if (nextState) {
+                this.transitionTo(nextState);
+            } else {
+                dialogWindow.say("Sorry I didn't understand, could you repeat?", "system");
+            }
+
+
         },
 
         afterStateTransition: function() {
@@ -60,7 +74,15 @@ jQuery(function($) {
             /* Utter the system message */
             this.sayCurrentMessage();
 
-            if (this.isFinished()) dialogWindow.say("<INTERACTION FINISHED>");
+            this.checkFinished();
+        },
+
+        checkFinished: function() {
+            if (this.isFinished()) {
+                dialogWindow.say("<INTERACTION FINISHED>");
+                return true;
+            }
+            return false;
         },
 
         /* Performs the FSM transition: */
@@ -84,18 +106,36 @@ jQuery(function($) {
         },
 
         getBestTransition: function(text) {
-            var transitionList = this.transitionMap[this.currentState];
+            var transitionList = this.getPossibleTransitions(this.currentState);
             var bestDestination = false;
             var bestScore = 0;
+            var defaultDestination = false;
 
-            for(var transition in transitionList) {
-                var kwList = transitionList[transition].kw || [];
+            _.each(transitionList, function(transition) {
+                var kwList = transition.kw || [];
                 var score = this.computeScore(kwList, text);
-                if (score > bestScore) {
-                    bestDestination = transitionList[transition].to;
+                if (transition.default) {
+                    defaultDestination = transition.to;
                 }
+                if (score > bestScore) {
+                    bestDestination = transition.to;
+                    bestScore = score;
+                }
+            }, this);
+
+            if (!bestDestination) { // If no destination is set, take the default (which might be unset as well).
+                bestDestination = defaultDestination;
             }
             return bestDestination;
+        },
+
+        /**
+         * Returns an array with all possible transitions from the given state.
+         * @param origin
+         */
+        getPossibleTransitions: function(origin) {
+            var extra = this.transitionMap['*']; // Add the extra transitions
+            return _.union(this.transitionMap[origin], extra);
         },
 
         /*
