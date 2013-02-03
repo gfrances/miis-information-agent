@@ -7,7 +7,7 @@
 
 var fsm = {
     stateMessages: {
-        'greeting': 'Hello, this is the MIIS information agent.',
+        'greeting': "Hello, this is the MIIS information agent. I can provide you information about the master's courses, professors, fees, and some other relevant subjects.",
         "basic-question": "How can I help you?",
         "basic-question-silent": " ",
 
